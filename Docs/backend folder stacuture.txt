@@ -1,0 +1,33 @@
+Backend/
+│── manage.py                  # Django entry point
+│── requirements/              # Split dependencies
+│   ├── base.txt
+│   ├── dev.txt
+│   ├── prod.txt
+│
+│── arshaad/                   # Django project root
+│   ├── __init__.py
+│   ├── settings/              # Split settings
+│   │   ├── __init__.py
+│   │   ├── base.py
+│   │   ├── dev.py
+│   │   ├── prod.py
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── asgi.py
+│
+│── apps/                      # Django modular apps
+│   ├── core/                  # Shared utilities (common models, mixins, etc.)
+│   ├── users/                 # Authentication, profiles
+│   ├── api/                   # REST API (Django REST Framework)
+│   ├── ai/                    # AI/ML services exposed as API
+│   │   ├── inference/         # Code to load & run models
+│   │   ├── training/          # Training scripts
+│   │   ├── models/            # Saved models (.pt, .pkl, .h5, etc.)
+│   │   └── tasks/             # Async tasks (Celery, RQ)
+│   └── ...
+│
+│── tests/                     # Global test folder
+│── scripts/                   # Management scripts (DB seed, migrations, etc.)
+│── Dockerfile                 # Backend docker image
+│── docker-compose.yml
