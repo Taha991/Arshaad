@@ -6,6 +6,7 @@ import { Login } from './pages/Login'
 import { Market } from './pages/Market'
 import { Roadmaps } from './pages/Roadmaps'
 import { KnowYourPath } from './pages/KnowYourPath'
+import { AuthCallback } from './pages/AuthCallback'
 import { NotFound } from './pages/NotFound'
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/market" element={<Market />} />
           <Route path="/roadmaps" element={<Roadmaps />} />
           <Route path="/path" element={<KnowYourPath />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

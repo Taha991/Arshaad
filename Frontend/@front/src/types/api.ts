@@ -11,4 +11,15 @@ export type LoginRequest = {
 
 export type LoginResponse = {
   user: User
+  accessToken?: string
+  refreshToken?: string
+}
+
+export type RefreshResponse = {
+  accessToken: string
+}
+
+export type OAuthLoginRequest = {
+  provider: 'google'
+  idToken: string
 }

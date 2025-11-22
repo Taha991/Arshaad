@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import type { User, LoginRequest, LoginResponse } from '../types/api'
-import { loginApi, logoutApi } from '../services/authService'
+import type { User, LoginRequest, LoginResponse, OAuthLoginRequest } from '../types/api'
+import { loginApi, logoutApi, oauthLoginApi } from '../services/authService'
+import { setAccessToken, setRefreshToken, clearTokens } from '../services/tokenService'
 
 type AuthState = {
   user: User | null
@@ -17,6 +18,14 @@ const initialState: AuthState = {
 export const login = createAsyncThunk<LoginResponse, LoginRequest>('auth/login', async (payload, { rejectWithValue }) => {
   try {
     return await loginApi(payload)
+  } catch (err: any) {
+    return rejectWithValue(err.message)
+  }
+})
+
+export const oauthLogin = createAsyncThunk<LoginResponse, OAuthLoginRequest>('auth/oauthLogin', async (payload, { rejectWithValue }) => {
+  try {
+    return await oauthLoginApi(payload.provider, payload.idToken)
   } catch (err: any) {
     return rejectWithValue(err.message)
   }
@@ -43,6 +52,8 @@ const slice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.status = 'succeeded'
         state.user = action.payload.user
+        if (action.payload.accessToken) setAccessToken(action.payload.accessToken)
+        if (action.payload.refreshToken) setRefreshToken(action.payload.refreshToken)
       })
       .addCase(login.rejected, (state, action) => {
         state.status = 'failed'
@@ -51,6 +62,21 @@ const slice = createSlice({
       .addCase(logout.fulfilled, (state) => {
         state.user = null
         state.status = 'idle'
+        clearTokens()
+      })
+      .addCase(oauthLogin.pending, (state) => {
+        state.status = 'loading'
+        state.error = null
+      })
+      .addCase(oauthLogin.fulfilled, (state, action) => {
+        state.status = 'succeeded'
+        state.user = action.payload.user
+        if (action.payload.accessToken) setAccessToken(action.payload.accessToken)
+        if (action.payload.refreshToken) setRefreshToken(action.payload.refreshToken)
+      })
+      .addCase(oauthLogin.rejected, (state, action) => {
+        state.status = 'failed'
+        state.error = (action.payload as string) || 'OAuth login failed'
       })
   }
 })

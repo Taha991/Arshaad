@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '../store/store'
 import { login } from '../store/authSlice'
+import { GoogleButton } from '../components/molecules/GoogleButton'
 
 export function Login() {
   const dispatch = useAppDispatch()
@@ -13,6 +14,7 @@ export function Login() {
     e.preventDefault()
     dispatch(login({ email, password }))
   }
+
 
   return (
     <div className="container-xl py-12">
@@ -31,6 +33,9 @@ export function Login() {
           <button className="btn-primary w-full" disabled={status === 'loading'}>
             {status === 'loading' ? 'Signing in…' : 'Sign In'}
           </button>
+        </div>
+        <div className="mt-3">
+          <GoogleButton />
         </div>
         {error && (
           <div role="alert" aria-live="assertive" className="mt-4 text-red-700">{error}</div>
