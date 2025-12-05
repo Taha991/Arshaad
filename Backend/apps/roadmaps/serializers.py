@@ -5,17 +5,15 @@ from .models import Roadmap, RoadmapStage, Resource, RoadmapResource
 class ResourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
-        fields = '__all__'
-        read_only_fields = ['uuid', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'type', 'url', 'provider', 'rating', 'is_free', 'difficulty_level']
 
 
 class RoadmapResourceSerializer(serializers.ModelSerializer):
     resource = ResourceSerializer(read_only=True)
-    resource_id = serializers.PrimaryKeyRelatedField(queryset=Resource.objects.all(), source='resource', write_only=True)
     
     class Meta:
         model = RoadmapResource
-        fields = '__all__'
+        fields = ['id', 'resource', 'order_in_stage', 'is_required', 'estimated_completion_days']
 
 
 class RoadmapStageSerializer(serializers.ModelSerializer):
@@ -23,16 +21,13 @@ class RoadmapStageSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = RoadmapStage
-        fields = '__all__'
+        fields = ['id', 'title', 'description', 'stage_order', 'estimated_hours', 'skills_gained', 'completion_criteria', 'resources']
 
 
 class RoadmapSerializer(serializers.ModelSerializer):
     stages = RoadmapStageSerializer(many=True, read_only=True, source='stages.all')
-    created_by_name = serializers.CharField(source='created_by.name', read_only=True)
     
     class Meta:
         model = Roadmap
-        fields = '__all__'
-        read_only_fields = ['uuid', 'created_at', 'updated_at', 'popularity_score']
-
-
+        fields = ['id', 'uuid', 'title', 'description', 'track', 'difficulty', 'estimated_weeks', 'stages', 'created_at', 'updated_at']
+        read_only_fields = ['uuid', 'created_at', 'updated_at']

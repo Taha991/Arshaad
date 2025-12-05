@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
 from apps.users.models import User
 
@@ -14,17 +15,17 @@ class Roadmap(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    tags = models.JSONField(default=list, blank=True)
+    tags = ArrayField(models.CharField(max_length=255), default=list, blank=True)
     difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, default='beginner')
     estimated_weeks = models.IntegerField(default=12)
-    prerequisites = models.JSONField(default=list, blank=True)
-    learning_objectives = models.JSONField(default=list, blank=True)
-    career_tracks = models.JSONField(default=list, blank=True)
+    prerequisites = ArrayField(models.CharField(max_length=255), default=list, blank=True)
+    learning_objectives = ArrayField(models.CharField(max_length=255), default=list, blank=True)
+    career_tracks = ArrayField(models.CharField(max_length=255), default=list, blank=True)
     popularity_score = models.IntegerField(default=0)
     success_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='roadmaps', null=True, blank=True)
     track = models.CharField(max_length=100, blank=True, null=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_roadmaps')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_roadmaps', db_column='created_by')
     is_public = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -46,7 +47,7 @@ class RoadmapStage(models.Model):
     description = models.TextField(blank=True, null=True)
     goals = models.TextField(blank=True, null=True)
     estimated_hours = models.IntegerField(default=20)
-    skills_gained = models.JSONField(default=list, blank=True)
+    skills_gained = ArrayField(models.CharField(max_length=255), default=list, blank=True)
     completion_criteria = models.TextField(blank=True, null=True)
     
     class Meta:
@@ -97,9 +98,9 @@ class Resource(models.Model):
     currency = models.CharField(max_length=3, default='USD')
     estimated_duration_hours = models.IntegerField(blank=True, null=True)
     language = models.CharField(max_length=10, default='en')
-    subtitles_available = models.JSONField(default=list, blank=True)
-    prerequisites = models.JSONField(default=list, blank=True)
-    skills_covered = models.JSONField(default=list, blank=True)
+    subtitles_available = ArrayField(models.CharField(max_length=10), default=list, blank=True)
+    prerequisites = ArrayField(models.CharField(max_length=255), default=list, blank=True)
+    skills_covered = ArrayField(models.CharField(max_length=255), default=list, blank=True)
     last_checked = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     created_at = models.DateTimeField(default=timezone.now)
