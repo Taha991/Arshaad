@@ -56,23 +56,42 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     id = models.BigAutoField(primary_key=True)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    email = models.EmailField(unique=True)
-    name = models.CharField(max_length=255, blank=True)
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='guest')
+    email = models.CharField(max_length=255, unique=True)  # Changed from EmailField to match DB
+    name = models.CharField(max_length=150, blank=True, null=True)
+    avatar = models.TextField(blank=True, null=True)  # Changed from ImageField to TextField to match DB
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='student')
+    
+    # Password field - map to password_hash in database
+    password = models.CharField(max_length=128, blank=True, db_column='password_hash')
+    uni_id = models.CharField(max_length=100, blank=True, null=True)
+    country = models.CharField(max_length=100, default='EG', blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    university = models.CharField(max_length=255, blank=True, null=True)
+    study_year = models.IntegerField(blank=True, null=True)
+    major = models.CharField(max_length=100, blank=True, null=True)
+    linkedin_url = models.CharField(max_length=255, blank=True, null=True)
+    github_username = models.CharField(max_length=100, blank=True, null=True)
     
     is_active = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
     onboarding_completed = models.BooleanField(default=False)
     
-    date_joined = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+    date_joined = models.DateTimeField(default=timezone.now, blank=True, null=True)
     last_login = models.DateTimeField(null=True, blank=True)
     
     objects = UserManager()
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+    
+    class Meta:
+        db_table = 'users'
+        managed = True  # Django manages this table
+    
     
     def __str__(self):
         return self.email

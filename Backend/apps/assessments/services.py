@@ -1,6 +1,7 @@
 from decimal import Decimal
 from .models import Assessment, Recommendation
 from apps.roadmaps.models import Roadmap
+from apps.ai.services import AIService
 
 
 class RecommendationService:
@@ -14,7 +15,62 @@ class RecommendationService:
     
     def generate_recommendation(self, assessment: Assessment) -> Recommendation:
         """
-        Generate recommendation based on assessment answers
+        Generate recommendation based on assessment answers using AI model
+        """
+        answers_data = assessment.answers_json
+        
+        # Extract answers and study year
+        study_year = answers_data.get('study_year')
+        answers_raw = answers_data.get('answers', {})
+        
+        # Convert string keys to integers (frontend sends "1", "2" but model expects 1, 2)
+        answers = {}
+        for k, v in answers_raw.items():
+            if isinstance(k, str) and k.isdigit():
+                answers[int(k)] = v
+            elif isinstance(k, int):
+                answers[k] = v
+        
+        # Use AI service to generate recommendations
+        ai_service = AIService()
+        recommendations = ai_service.generate_track_recommendations(answers, study_year)
+        
+        if not recommendations:
+            # Fallback to old method if AI fails
+            return self._generate_recommendation_fallback(assessment)
+        
+        # Top recommendation
+        top_rec = recommendations[0]
+        
+        # Alternative tracks (2nd and 3rd)
+        alternatives = [
+            {'track': rec['track'], 'score': rec['confidence']}
+            for rec in recommendations[1:3]
+        ]
+        
+        # Create recommendation record
+        recommendation = Recommendation.objects.create(
+            user=assessment.user,
+            assessment=assessment,
+            track=top_rec['track'],
+            confidence=Decimal(str(top_rec['confidence'])),
+            model_version='ai-v1.0',
+            alternative_tracks=alternatives,
+            personalization_factors={
+                'study_year': study_year,
+                'answers_summary': {
+                    'agree_count': sum(1 for v in answers.values() if v == 'agree'),
+                    'disagree_count': sum(1 for v in answers.values() if v == 'disagree'),
+                }
+            },
+            explanation=top_rec['explanation']
+        )
+        
+        return recommendation
+    
+    def _generate_recommendation_fallback(self, assessment: Assessment) -> Recommendation:
+        """
+        Fallback method using rule-based scoring (if AI fails)
         """
         answers = assessment.answers_json
         
@@ -26,29 +82,20 @@ class RecommendationService:
         # Get top track
         top_track = max(track_scores.items(), key=lambda x: x[1])
         
-        # Get alternatives (top 2, excluding the top one)
+        # Get alternatives
         sorted_tracks = sorted(track_scores.items(), key=lambda x: x[1], reverse=True)
         alternatives = [{'track': track, 'score': float(score)} for track, score in sorted_tracks[1:3]]
         
-        # Calculate confidence (normalize score to 0-100)
-        max_possible_score = 100
-        confidence = Decimal(str((top_track[1] / max_possible_score) * 100)).quantize(Decimal('0.01'))
-        
-        # Generate explanation
+        confidence = Decimal(str((top_track[1] / 100) * 100)).quantize(Decimal('0.01'))
         explanation = self._generate_explanation(top_track[0], answers, top_track[1])
         
-        # Create recommendation
         recommendation = Recommendation.objects.create(
             user=assessment.user,
             assessment=assessment,
             track=top_track[0],
             confidence=confidence,
+            model_version='rule-based-v1.0',
             alternative_tracks=alternatives,
-            personalization_factors={
-                'skill_level': answers.get('skill_level', 'beginner'),
-                'interests': answers.get('interests', []),
-                'learning_style': answers.get('learning_style', 'visual'),
-            },
             explanation=explanation
         )
         
