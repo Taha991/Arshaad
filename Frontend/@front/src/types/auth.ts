@@ -6,6 +6,7 @@ export interface User {
   role: 'guest' | 'student' | 'mentor' | 'admin'
   avatar?: string | null
   is_verified: boolean
+  onboarding_completed?: boolean
   date_joined?: string
 }
 

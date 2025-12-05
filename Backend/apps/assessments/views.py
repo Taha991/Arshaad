@@ -23,6 +23,9 @@ class AssessmentViewSet(viewsets.ModelViewSet):
         recommendation = service.generate_recommendation(assessment)
         serializer = RecommendationSerializer(recommendation)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    def get_queryset(self):
+        return Assessment.objects.filter(user=self.request.user)
 
 
 class RecommendationViewSet(viewsets.ReadOnlyModelViewSet):

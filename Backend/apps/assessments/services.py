@@ -26,9 +26,9 @@ class RecommendationService:
         # Get top track
         top_track = max(track_scores.items(), key=lambda x: x[1])
         
-        # Get alternatives (top 3)
+        # Get alternatives (top 2, excluding the top one)
         sorted_tracks = sorted(track_scores.items(), key=lambda x: x[1], reverse=True)
-        alternatives = [{'track': track, 'score': float(score)} for track, score in sorted_tracks[1:4]]
+        alternatives = [{'track': track, 'score': float(score)} for track, score in sorted_tracks[1:3]]
         
         # Calculate confidence (normalize score to 0-100)
         max_possible_score = 100
@@ -61,7 +61,62 @@ class RecommendationService:
         """
         score = 0.0
         
-        # Interest matching
+        # Handle new assessment format (10 questions with agree/disagree)
+        if 'answers' in answers:
+            question_answers = answers.get('answers', {})
+            
+            # Map questions to tracks
+            # Question 1: Creative/Innovative → AI/ML, Game Development
+            if question_answers.get(1) == 'agree':
+                if track in ['AI/ML', 'Game Development']:
+                    score += 15
+            
+            # Question 2: Team work → All tracks benefit
+            if question_answers.get(2) == 'agree':
+                score += 5
+            
+            # Question 3: UI/UX → Web Development, Mobile Development
+            if question_answers.get(3) == 'agree':
+                if track in ['Web Development', 'Mobile Development']:
+                    score += 20
+            
+            # Question 4: Data analysis → Data Science, AI/ML
+            if question_answers.get(4) == 'agree':
+                if track in ['Data Science', 'AI/ML']:
+                    score += 20
+            
+            # Question 5: Security → Cybersecurity
+            if question_answers.get(5) == 'agree':
+                if track == 'Cybersecurity':
+                    score += 25
+            
+            # Question 6: Complex projects → All advanced tracks
+            if question_answers.get(6) == 'agree':
+                if track in ['AI/ML', 'Cloud/DevOps', 'Blockchain']:
+                    score += 10
+            
+            # Question 7: Continuous learning → All tracks
+            if question_answers.get(7) == 'agree':
+                score += 5
+            
+            # Question 8: Mobile apps → Mobile Development
+            if question_answers.get(8) == 'agree':
+                if track == 'Mobile Development':
+                    score += 25
+            
+            # Question 9: Performance optimization → Cloud/DevOps, Web Development
+            if question_answers.get(9) == 'agree':
+                if track in ['Cloud/DevOps', 'Web Development']:
+                    score += 15
+            
+            # Question 10: AI/ML → AI/ML
+            if question_answers.get(10) == 'agree':
+                if track == 'AI/ML':
+                    score += 25
+            
+            return min(score, 100)  # Cap at 100
+        
+        # Old format (backward compatibility)
         interests = answers.get('interests', [])
         track_keywords = {
             'AI/ML': ['ai', 'machine learning', 'deep learning', 'neural networks', 'data'],
@@ -79,23 +134,33 @@ class RecommendationService:
             if any(keyword.lower() in str(interest).lower() for keyword in keywords):
                 score += 20
         
-        # Skill level adjustment
         skill_level = answers.get('skill_level', 'beginner')
         if skill_level == 'intermediate':
             score += 10
         elif skill_level == 'advanced':
             score += 20
         
-        # Study hours (more hours = higher score for commitment)
         weekly_hours = answers.get('weekly_study_hours', 0)
-        score += min(weekly_hours / 2, 15)  # Max 15 points
+        score += min(weekly_hours / 2, 15)
         
-        return min(score, 100)  # Cap at 100
+        return min(score, 100)
     
     def _generate_explanation(self, track: str, answers: dict, score: float) -> str:
         """
         Generate human-readable explanation for the recommendation
         """
+        # Handle new format with 10 questions
+        if 'answers' in answers:
+            question_answers = answers.get('answers', {})
+            agree_count = sum(1 for v in question_answers.values() if v == 'agree')
+            
+            explanation = f"بناءً على إجاباتك، نوصي بمسار {track}. "
+            explanation += f"إجاباتك تظهر اهتمامًا قويًا بهذا المجال "
+            explanation += f"مع نسبة توافق {score:.1f}%."
+            
+            return explanation
+        
+        # Old format (backward compatibility)
         interests = answers.get('interests', [])
         skill_level = answers.get('skill_level', 'beginner')
         

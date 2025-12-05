@@ -64,7 +64,8 @@ const GoogleLogin: React.FC<GoogleLoginProps> = ({ onSuccess, onError }) => {
         if (onSuccess) {
           onSuccess()
         } else {
-          navigate('/dashboard')
+          // New users should go through onboarding
+          navigate('/onboarding')
         }
       } catch (error: any) {
         const errorMessage = error.response?.data?.detail || 'Google login failed'

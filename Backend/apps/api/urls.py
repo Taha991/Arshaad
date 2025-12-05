@@ -9,6 +9,7 @@ from .views.auth import (
     ResetPasswordConfirmView
 )
 from .views.oauth import GoogleOAuthView
+from .views.onboarding import CompleteOnboardingView
 
 urlpatterns = [
     # Authentication endpoints
@@ -24,4 +25,7 @@ urlpatterns = [
     path('auth/oauth/google/', GoogleOAuthView.as_view(), name='google_oauth'),
     path('auth/', include('dj_rest_auth.urls')),
     path('auth/oauth/', include('dj_rest_auth.registration.urls')),
+    
+    # Onboarding
+    path('onboarding/complete/', CompleteOnboardingView.as_view(), name='complete_onboarding'),
 ]

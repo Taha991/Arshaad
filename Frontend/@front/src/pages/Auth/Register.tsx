@@ -10,7 +10,7 @@ import GoogleLogin from '../../components/organisms/GoogleLogin'
 const Register: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>()
   const navigate = useNavigate()
-  const { isAuthenticated, isLoading, error } = useSelector((state: RootState) => state.auth)
+  const { isAuthenticated, isLoading, error, user } = useSelector((state: RootState) => state.auth)
 
   const [formData, setFormData] = useState({
     email: '',
@@ -27,10 +27,15 @@ const Register: React.FC = () => {
   })
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard')
+    if (isAuthenticated && user) {
+      // New users should go through onboarding
+      if (!user.onboarding_completed) {
+        navigate('/onboarding')
+      } else {
+        navigate('/dashboard')
+      }
     }
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, user, navigate])
 
   useEffect(() => {
     return () => {

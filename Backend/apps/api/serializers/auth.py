@@ -59,6 +59,7 @@ class TokenSerializer(serializers.Serializer):
             'name': user.name or user.email.split('@')[0],
             'role': user.role,
             'is_verified': user.is_verified,
+            'onboarding_completed': getattr(user, 'onboarding_completed', False),
             'avatar': user.avatar.url if user.avatar else None,
             'date_joined': user.date_joined.isoformat() if user.date_joined else None,
         }
