@@ -1,11 +1,12 @@
 export interface User {
   id: number
+  uuid: string
   email: string
   name: string
   role: 'guest' | 'student' | 'mentor' | 'admin'
-  avatar?: string
+  avatar?: string | null
   is_verified: boolean
-  date_joined: string
+  date_joined?: string
 }
 
 export interface LoginCredentials {

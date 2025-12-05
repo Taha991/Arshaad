@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { authAPI } from '../../services/api/auth'
-import { LoginCredentials, RegisterData, User, AuthTokens } from '../../types/auth'
+import { LoginCredentials, RegisterData, User, AuthTokens, AuthResponse } from '../../types/auth'
 
 interface AuthState {
   user: User | null
@@ -81,6 +81,19 @@ export const getCurrentUser = createAsyncThunk(
   }
 )
 
+export const oauthLogin = createAsyncThunk(
+  'auth/oauthLogin',
+  async (authResponse: AuthResponse, { rejectWithValue }) => {
+    try {
+      localStorage.setItem('access_token', authResponse.access)
+      localStorage.setItem('refresh_token', authResponse.refresh)
+      return authResponse
+    } catch (error: any) {
+      return rejectWithValue('OAuth login failed')
+    }
+  }
+)
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -142,6 +155,25 @@ const authSlice = createSlice({
       })
       .addCase(getCurrentUser.rejected, (state) => {
         state.user = null
+        state.isAuthenticated = false
+      })
+
+    // OAuth login
+    builder
+      .addCase(oauthLogin.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(oauthLogin.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.tokens = { access: action.payload.access, refresh: action.payload.refresh }
+        state.user = action.payload.user as User
+        state.isAuthenticated = true
+        state.error = null
+      })
+      .addCase(oauthLogin.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
         state.isAuthenticated = false
       })
   },

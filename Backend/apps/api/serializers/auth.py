@@ -54,11 +54,13 @@ class TokenSerializer(serializers.Serializer):
         user = self.context['user']
         return {
             'id': user.id,
-            'uuid': user.uuid,
+            'uuid': str(user.uuid),
             'email': user.email,
-            'name': user.name,
+            'name': user.name or user.email.split('@')[0],
             'role': user.role,
-            'is_verified': user.is_verified
+            'is_verified': user.is_verified,
+            'avatar': user.avatar.url if user.avatar else None,
+            'date_joined': user.date_joined.isoformat() if user.date_joined else None,
         }
 
 
