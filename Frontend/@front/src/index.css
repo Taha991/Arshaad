@@ -2,17 +2,132 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* ── CSS Custom Properties ─────────────────────────────── */
+:root {
+  --color-bg-base:      #0B1120;
+  --color-bg-surface:   #0F1729;
+  --color-bg-card:      rgba(255,255,255,0.04);
+  --color-border-glass: rgba(255,255,255,0.08);
+  --color-neon-cyan:    #22D3EE;
+  --color-neon-blue:    #3B82F6;
+  --color-neon-violet:  #8B5CF6;
+  --gradient-brand:     linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #22D3EE 100%);
+  --gradient-text:      linear-gradient(to right, #60A5FA, #A78BFA, #22D3EE);
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* ── Base ──────────────────────────────────────────────── */
+@layer base {
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background-color: var(--color-bg-base);
+    color: #E2E8F0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::-webkit-scrollbar       { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0B1120; }
+  ::-webkit-scrollbar-thumb { background: rgba(34,211,238,0.3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(34,211,238,0.6); }
+
+  ::selection { background: rgba(34,211,238,0.2); color: #22D3EE; }
 }
 
+/* ── Components ────────────────────────────────────────── */
+@layer components {
+
+  .glass-card {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 1rem;
+  }
+
+  .glass-card-hover {
+    @apply glass-card;
+    transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+  }
+  .glass-card-hover:hover {
+    border-color: rgba(34,211,238,0.25);
+    box-shadow: 0 0 30px rgba(34,211,238,0.08);
+    transform: translateY(-2px);
+  }
+
+  .gradient-text {
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  .gradient-text-animated {
+    background: linear-gradient(270deg, #60A5FA, #A78BFA, #22D3EE, #60A5FA);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-x 8s ease infinite;
+  }
+
+  .neon-border {
+    border: 1px solid rgba(34,211,238,0.4) !important;
+    box-shadow: 0 0 20px rgba(34,211,238,0.15);
+  }
+
+  .blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(80px);
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  .btn-glass {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  }
+  .btn-glass:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.25);
+  }
+
+  .btn-neon {
+    background: linear-gradient(135deg, #3B82F6, #8B5CF6, #22D3EE);
+    box-shadow: 0 0 20px rgba(34,211,238,0.25);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .btn-neon:hover {
+    box-shadow: 0 0 35px rgba(34,211,238,0.45);
+    transform: translateY(-1px);
+  }
+
+  .progress-gradient {
+    background: linear-gradient(to right, #3B82F6, #8B5CF6, #22D3EE);
+  }
+
+  .tab-active {
+    color: #22D3EE !important;
+    border-bottom: 2px solid #22D3EE;
+    background: rgba(34,211,238,0.05);
+  }
+}
+
+/* ── Utilities ─────────────────────────────────────────── */
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* ── Print styles for Reports ──────────────────────────── */
+@media print {
+  body { background: white !important; color: black !important; }
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+}

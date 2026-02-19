@@ -1,243 +1,122 @@
-import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../store/store'
-import api from '../../services/api/auth'
-import Button from '../../components/atoms/Button'
+import { mockRoadmapStages, mockDashboardStats } from '@/data/mockData'
+import GlassCard from '@/components/atoms/GlassCard'
+import ProgressRing from '@/components/atoms/ProgressRing'
 
-interface RoadmapStage {
-  id: number
-  title: string
-  description: string
-  stage_order: number
-  estimated_hours: number
-  resources: Array<{
-    id: number
-    resource: {
-      id: number
-      title: string
-      type: string
-      url: string
-    }
-    order_in_stage: number
-    is_required: boolean
-  }>
+const statusConfig = {
+  completed:   { badge: 'bg-green-400/10 text-green-400 border-green-400/20',  label: 'Completed · مكتمل'  },
+  in_progress: { badge: 'bg-cyan-400/10 text-cyan-400 border-cyan-400/20',     label: 'In Progress · جاري' },
+  locked:      { badge: 'bg-white/5 text-white/30 border-white/10',            label: 'Locked · مقفل'      },
 }
 
-interface Roadmap {
-  id: number
-  title: string
-  description: string
-  track: string
-  stages: RoadmapStage[]
-  created_at: string
-}
-
-const MyRoadmap: React.FC = () => {
-  const [roadmap, setRoadmap] = useState<Roadmap | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetchRoadmap()
-  }, [])
-
-  const fetchRoadmap = async () => {
-    try {
-      setLoading(true)
-      const response = await api.get('/roadmaps/my_roadmap/')
-      setRoadmap(response.data)
-      setError(null)
-    } catch (err: any) {
-      console.error('Error fetching roadmap:', err)
-      setError('فشل تحميل خطة التعلم. يرجى المحاولة مرة أخرى.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">جاري تحميل خطة التعلم...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <Button onClick={fetchRoadmap}>إعادة المحاولة</Button>
-        </div>
-      </div>
-    )
-  }
-
-  if (!roadmap) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">لا توجد خطة تعلم</h2>
-          <p className="text-gray-600 mb-4">لم يتم إنشاء خطة تعلم بعد. يرجى إكمال عملية التسجيل.</p>
-        </div>
-      </div>
-    )
-  }
+export default function MyRoadmap() {
+  const completedCount = mockRoadmapStages.filter(s => s.status === 'completed').length
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{roadmap.title}</h1>
-              <p className="text-gray-600">{roadmap.description}</p>
-              <div className="mt-4">
-                <span className="inline-block bg-primary-100 text-primary-800 text-sm font-semibold px-3 py-1 rounded-full">
-                  {roadmap.track}
-                </span>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-500">عدد المراحل</p>
-              <p className="text-2xl font-bold text-primary-600">{roadmap.stages?.length || 0}</p>
-            </div>
-          </div>
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold gradient-text">{mockDashboardStats.selectedTrack}</h2>
+          <p className="text-white/40 text-sm font-arabic">{mockDashboardStats.selectedTrackAr}</p>
         </div>
+        <ProgressRing
+          percent={mockDashboardStats.overallProgress}
+          size={80}
+          color="gradient"
+          label="Progress"
+        />
+      </div>
 
-        {/* Progress Overview */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">نظرة عامة على التقدم</h2>
-          <div className="w-full bg-gray-200 rounded-full h-4">
-            <div className="bg-primary-600 h-4 rounded-full" style={{ width: '0%' }}>
-              {/* Progress will be calculated based on completed stages */}
-            </div>
-          </div>
-          <p className="text-sm text-gray-600 mt-2">0% مكتمل</p>
+      {/* Progress bar */}
+      <GlassCard padding={false} className="p-4">
+        <div className="flex justify-between text-sm mb-2">
+          <span className="text-white/60">Overall Progress · التقدم الكلي</span>
+          <span className="text-cyan-400 font-bold">{completedCount}/{mockRoadmapStages.length} stages</span>
         </div>
+        <div className="h-2.5 rounded-full bg-white/10 overflow-hidden">
+          <div className="h-full rounded-full progress-gradient transition-all duration-700" style={{ width: `${mockDashboardStats.overallProgress}%` }} />
+        </div>
+        <p className="text-white/30 text-xs mt-2">
+          Next: {mockDashboardStats.nextMilestone} · <span className="font-arabic">{mockDashboardStats.nextMilestoneAr}</span>
+        </p>
+      </GlassCard>
 
-        {/* Stages */}
-        <div className="space-y-6">
-          {roadmap.stages?.map((stage, index) => (
-            <div key={stage.id} className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center mb-2">
-                      <span className="bg-primary-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">
-                        {stage.stage_order}
-                      </span>
-                      <h3 className="text-xl font-bold text-gray-900">{stage.title}</h3>
+      {/* Stages timeline */}
+      <div className="relative">
+        <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-gradient-to-b from-green-400 via-cyan-400/50 to-white/10 hidden sm:block" />
+        <div className="space-y-4">
+          {mockRoadmapStages.map(stage => {
+            const cfg = statusConfig[stage.status]
+            const isLocked = stage.status === 'locked'
+            return (
+              <div key={stage.id} className={`flex gap-4 ${isLocked ? 'opacity-50' : ''}`}>
+                {/* Step circle */}
+                <div className="relative flex-shrink-0 hidden sm:flex">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold z-10 border
+                    ${stage.status === 'completed' ? 'bg-green-400 text-black border-green-400' :
+                      stage.status === 'in_progress' ? 'bg-cyan-400/20 text-cyan-400 border-cyan-400 shadow-neon-cyan' :
+                      'bg-white/5 text-white/30 border-white/15'}`}>
+                    {stage.status === 'completed' ? '✓' : stage.stage_order}
+                  </div>
+                </div>
+
+                <GlassCard
+                  hover={!isLocked}
+                  neonBorder={stage.status === 'in_progress'}
+                  className="flex-1"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <span className="text-white/30 text-xs sm:hidden">Stage {stage.stage_order}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full border ${cfg.badge}`}>{cfg.label}</span>
+                        <span className="text-white/30 text-xs">{stage.estimated_hours}h</span>
+                      </div>
+                      <h3 className="text-white font-semibold text-base">{stage.title}</h3>
+                      <p className="text-white/40 text-xs font-arabic">{stage.titleAr}</p>
+                      <p className="text-white/50 text-sm mt-2 leading-relaxed">{stage.description}</p>
                     </div>
-                    <p className="text-gray-600 mt-2">{stage.description}</p>
-                    {stage.estimated_hours > 0 && (
-                      <p className="text-sm text-gray-500 mt-2">
-                        الوقت المقدر: {stage.estimated_hours} ساعة
-                      </p>
+                    {!isLocked && (
+                      <ProgressRing
+                        percent={stage.progressPercent}
+                        size={60}
+                        strokeWidth={5}
+                        color={stage.status === 'completed' ? 'cyan' : 'gradient'}
+                        className="flex-shrink-0 self-center sm:self-start"
+                      />
                     )}
                   </div>
-                  <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                    قيد الانتظار
-                  </span>
-                </div>
+
+                  {stage.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-4 pt-4 border-t border-white/5">
+                      {stage.skills.map(skill => (
+                        <span key={skill} className="text-xs px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/50">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {!isLocked && (
+                    <div className="mt-4 flex gap-2">
+                      {stage.status === 'in_progress' && (
+                        <button className="px-4 py-1.5 rounded-lg btn-neon text-white text-xs font-medium">
+                          Continue · أكمل التعلم
+                        </button>
+                      )}
+                      {stage.status === 'completed' && (
+                        <button className="px-4 py-1.5 rounded-lg btn-glass text-white/60 text-xs font-medium">
+                          Review · مراجعة
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </GlassCard>
               </div>
-
-              {/* Resources */}
-              {stage.resources && stage.resources.length > 0 && (
-                <div className="p-6 bg-gray-50">
-                  <h4 className="font-semibold text-gray-900 mb-4">الموارد التعليمية</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {stage.resources
-                      .sort((a, b) => a.order_in_stage - b.order_in_stage)
-                      .map((roadmapResource) => {
-                        const resource = roadmapResource.resource
-                        return (
-                          <a
-                            key={roadmapResource.id}
-                            href={resource.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-primary-500 hover:shadow-md transition-all"
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center mb-2">
-                                  <span className="bg-primary-100 text-primary-800 text-xs font-semibold px-2 py-1 rounded mr-2">
-                                    {resource.type}
-                                  </span>
-                                  {roadmapResource.is_required && (
-                                    <span className="bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded">
-                                      مطلوب
-                                    </span>
-                                  )}
-                                </div>
-                                <h5 className="font-semibold text-gray-900 mb-1">{resource.title}</h5>
-                                <p className="text-sm text-gray-500 truncate">{resource.url}</p>
-                              </div>
-                              <svg
-                                className="w-5 h-5 text-gray-400 ml-2"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                />
-                              </svg>
-                            </div>
-                          </a>
-                        )
-                      })}
-                  </div>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="p-6 border-t border-gray-200 bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <Button variant="primary" size="sm">
-                    ابدأ هذه المرحلة
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    عرض التفاصيل
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* External Link */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-blue-900 mb-2">استكشف المزيد على roadmap.sh</h3>
-              <p className="text-blue-700 text-sm">
-                احصل على موارد إضافية ومراجعات تفصيلية لمسار {roadmap.track}
-              </p>
-            </div>
-            <a
-              href={`https://roadmap.sh/${roadmap.track.toLowerCase().replace(' ', '-')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              زيارة roadmap.sh
-            </a>
-          </div>
+            )
+          })}
         </div>
       </div>
     </div>
   )
 }
-
-export default MyRoadmap
-
