@@ -28,7 +28,7 @@ export default function MyRoadmap() {
       </div>
 
       {/* Progress bar */}
-      <GlassCard padding={false} className="p-4">
+      <GlassCard padding={false} className="bg-[#0B1120] p-4">
         <div className="flex justify-between text-sm mb-2">
           <span className="text-white/60">Overall Progress · التقدم الكلي</span>
           <span className="text-cyan-400 font-bold">{completedCount}/{mockRoadmapStages.length} stages</span>
@@ -63,7 +63,7 @@ export default function MyRoadmap() {
                 <GlassCard
                   hover={!isLocked}
                   neonBorder={stage.status === 'in_progress'}
-                  className="flex-1"
+                  className="bg-[#0B1120] flex-1"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">

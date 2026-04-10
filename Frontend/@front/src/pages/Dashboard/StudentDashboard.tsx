@@ -28,10 +28,10 @@ function OverviewPanel({ userName }: { userName: string }) {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Welcome */}
-      <GlassCard neonBorder>
+      <GlassCard neonBorder className='bg-[#0B1120]'>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className=" text-2xl font-bold text-white">
               Welcome back, <span className="gradient-text">{userName}</span>! 👋
             </h2>
             <p className="text-white/40 mt-1 font-arabic">أهلاً بك مرة أخرى، {userName}</p>
@@ -55,7 +55,7 @@ function OverviewPanel({ userName }: { userName: string }) {
           { icon: '🏆', value: mockDashboardStats.rank, label: 'Rank', labelAr: 'المرتبة', color: 'text-yellow-400' },
           { icon: '👥', value: `${onlineCount}/10`, label: 'Group Online', labelAr: 'متصل من مجموعتك', color: 'text-green-400' },
         ].map(s => (
-          <GlassCard key={s.label} hover className="flex flex-col items-center text-center gap-1">
+          <GlassCard key={s.label} hover className="bg-[#0B1120] flex flex-col items-center text-center gap-1">
             <span className="text-3xl">{s.icon}</span>
             <span className={`text-xl font-bold ${s.color}`}>{s.value}</span>
             <span className="text-white/50 text-xs">{s.label}</span>
@@ -65,7 +65,7 @@ function OverviewPanel({ userName }: { userName: string }) {
       </div>
 
       {/* Next milestone */}
-      <GlassCard padding={false} className="p-4">
+      <GlassCard padding={false} className="bg-[#0B1120] p-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400 flex-shrink-0">
             🎯
@@ -90,7 +90,7 @@ function OverviewPanel({ userName }: { userName: string }) {
       </GlassCard>
 
       {/* Group preview */}
-      <GlassCard padding={false} className="p-4">
+      <GlassCard padding={false} className="bg-[#0B1120] p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="text-white font-medium text-sm">{mockDashboardStats.groupName} · <span className="font-arabic text-white/40">{mockDashboardStats.groupNameAr}</span></p>
           <span className="text-xs text-green-400">{onlineCount} online</span>

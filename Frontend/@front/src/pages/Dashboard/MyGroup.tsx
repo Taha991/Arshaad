@@ -43,39 +43,39 @@ export default function MyGroup() {
 
       {/* Stats bar */}
       <div className="grid grid-cols-3 gap-3">
-        <GlassCard padding={false} className="p-3 text-center">
+        <GlassCard padding={false} className="bg-[#0B1120] p-3 text-center">
           <p className="text-2xl font-bold text-white">{mockGroupMembers.length}</p>
           <p className="text-white/40 text-xs">Members · أعضاء</p>
         </GlassCard>
-        <GlassCard padding={false} className="p-3 text-center">
+        <GlassCard padding={false} className="bg-[#0B1120] p-3 text-center">
           <p className="text-2xl font-bold text-green-400">{onlineCount}</p>
           <p className="text-white/40 text-xs">Online Now · متصل الآن</p>
         </GlassCard>
-        <GlassCard padding={false} className="p-3 text-center">
+        <GlassCard padding={false} className="bg-[#0B1120] p-3 text-center">
           <p className="text-2xl font-bold text-cyan-400">{avgProgress}%</p>
           <p className="text-white/40 text-xs">Avg Progress · متوسط التقدم</p>
         </GlassCard>
       </div>
 
       {/* Group progress bar */}
-      <GlassCard padding={false} className="p-4">
-        <div className="flex justify-between text-sm mb-2">
+      <GlassCard padding={false} className="bg-[#0B1120] p-4">
+        <div className=" flex justify-between text-sm mb-2">
           <span className="text-white/60">Group Average Progress</span>
           <span className="text-cyan-400 font-bold">{avgProgress}%</span>
         </div>
-        <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+        <div className=" h-2 rounded-full bg-white/10 overflow-hidden">
           <div className="h-full rounded-full progress-gradient transition-all duration-700" style={{ width: `${avgProgress}%` }} />
         </div>
       </GlassCard>
 
       {activeView === 'members' ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className=" grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {mockGroupMembers.map(member => (
             <GroupMemberCard key={member.id} member={member} />
           ))}
         </div>
       ) : (
-        <div className="max-w-md mx-auto">
+        <div className=" max-w-md mx-auto">
           <MentorCard mentor={mockMentor} />
         </div>
       )}

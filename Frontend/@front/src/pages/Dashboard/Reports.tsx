@@ -34,7 +34,7 @@ export default function Reports() {
       {/* Report Card */}
       <div ref={reportRef} className="space-y-5">
         {/* Header card */}
-        <GlassCard neonBorder className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+        <GlassCard neonBorder className="bg-[#0B1120] flex flex-col sm:flex-row items-start sm:items-center gap-5">
           <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center text-white font-bold text-2xl shadow-neon-blue`}>
             {user?.name?.[0]?.toUpperCase() ?? 'S'}
           </div>
@@ -60,7 +60,7 @@ export default function Reports() {
             { label: 'Hours Completed', labelAr: 'ساعات منجزة', value: mockDashboardStats.totalHoursLearned, suffix: 'h', color: 'blue' as const },
             { label: 'Stages Done', labelAr: 'مراحل منتهية', value: completedStages, suffix: `/${mockRoadmapStages.length}`, color: 'violet' as const },
           ].map((item, i) => (
-            <GlassCard key={i} className="flex flex-col items-center text-center gap-2">
+            <GlassCard key={i} className=" bg-[#0B1120] flex flex-col items-center text-center gap-2">
               {item.isPercent ? (
                 <ProgressRing percent={item.value} size={70} color="gradient" />
               ) : (
@@ -77,7 +77,7 @@ export default function Reports() {
         </div>
 
         {/* Roadmap progress */}
-        <GlassCard padding={false} className="p-5">
+        <GlassCard padding={false} className="bg-[#0B1120] p-5">
           <h4 className="text-white font-semibold mb-4">Roadmap Progress · تقدم خارطة الطريق</h4>
           <div className="space-y-3">
             {mockRoadmapStages.map(stage => (
@@ -112,7 +112,7 @@ export default function Reports() {
         </GlassCard>
 
         {/* Weekly goal */}
-        <GlassCard padding={false} className="p-5">
+        <GlassCard padding={false} className="bg-[#0B1120] p-5">
           <h4 className="text-white font-semibold mb-3">Weekly Goal · الهدف الأسبوعي</h4>
           <div className="flex items-center gap-4">
             <ProgressRing

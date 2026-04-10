@@ -12,7 +12,7 @@ export default function MarketInsights() {
       </div>
 
       {/* Salary Chart */}
-      <GlassCard padding={false} className="p-6">
+      <GlassCard padding={false} className="bg-[#0B1120] p-6">
         <h3 className="text-white font-semibold mb-5 flex items-center gap-2">
           <span className="text-xl">💰</span>
           Salary Benchmarks <span className="text-white/30 text-sm font-arabic">/ معايير الرواتب</span>
@@ -21,7 +21,7 @@ export default function MarketInsights() {
       </GlassCard>
 
       {/* Top Skills */}
-      <GlassCard padding={false} className="p-6">
+      <GlassCard padding={false} className="bg-[#0B1120] p-6">
         <h3 className="text-white font-semibold mb-5 flex items-center gap-2">
           <span className="text-xl">🔥</span>
           Top In-Demand Skills <span className="text-white/30 text-sm font-arabic">/ المهارات الأكثر طلباً</span>
@@ -59,7 +59,7 @@ export default function MarketInsights() {
           { emoji: '🌍', title: 'Remote Positions', titleAr: 'وظائف عن بُعد', value: '64%', sub: 'of new tech roles', color: 'text-cyan-400' },
           { emoji: '🎓', title: 'Hiring CS Grads', titleAr: 'توظيف خريجي الحاسبات', value: '3.2x', sub: 'vs 5 years ago', color: 'text-violet-400' },
         ].map(card => (
-          <GlassCard key={card.title} hover className="text-center">
+          <GlassCard key={card.title} hover className="bg-[#0B1120] text-center">
             <div className="text-4xl mb-3">{card.emoji}</div>
             <div className={`text-3xl font-bold ${card.color}`}>{card.value}</div>
             <p className="text-white font-medium mt-1 text-sm">{card.title}</p>

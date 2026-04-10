@@ -109,65 +109,97 @@ export default function OnboardingFlow() {
 
   // ── Step: Welcome ────────────────────────────────────────────────
   if (step === 'welcome') {
-    return (
-      <div className="min-h-screen bg-[#0B1120] relative overflow-hidden flex items-center justify-center px-4">
-        <DarkBg />
-        <div className="relative z-10 text-center animate-fade-in max-w-lg w-full">
+  return (
+    <div className="min-h-screen bg-[#0B1120] relative overflow-hidden flex items-center justify-center px-4">
+      <DarkBg />
+
+      {/* الكارت */}
+      <div className="relative z-10 w-full max-w-2xl">
+        <div className="bg-[#0F172A]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-12 sm:p-14 text-center shadow-[0_0_80px_rgba(59,130,246,0.15)]">
           <div className="text-7xl mb-6 animate-float">🧭</div>
           <h1 className="text-4xl sm:text-5xl font-bold mb-3">
-            Welcome, <span className="gradient-text">{user?.name?.split(' ')[0] ?? 'Friend'}</span>!
+            Welcome, <span className="gradient-text">
+              {user?.name?.split(' ')[0] ?? 'Friend'}
+            </span>!
           </h1>
+
           <p className="text-white/40 text-lg font-arabic mb-2">
             أهلاً وسهلاً، {user?.name?.split(' ')[0] ?? 'صديقي'}!
           </p>
+
           <p className="text-white/50 text-base mb-10 leading-relaxed">
             We'll ask you 10 quick questions to find your perfect career path.
             <br />
-            <span className="text-white/30 text-sm font-arabic">سنسألك 10 أسئلة لاكتشاف مسارك المهني الأمثل.</span>
+            <span className="text-white/30 text-sm font-arabic">
+              سنسألك 10 أسئلة لاكتشاف مسارك المهني الأمثل.
+            </span>
           </p>
+
           <button
             onClick={() => setStep('year')}
             className="btn-neon text-white text-lg font-semibold px-10 py-4 rounded-2xl"
           >
             Let's Start · هيا نبدأ 🚀
           </button>
-        </div>
-      </div>
-    )
-  }
 
-  // ── Step: Year ───────────────────────────────────────────────────
-  if (step === 'year') {
-    return (
-      <div className="min-h-screen bg-[#0B1120] relative overflow-hidden flex items-center justify-center px-4 py-10">
-        <DarkBg />
-        <div className="relative z-10 w-full max-w-2xl animate-slide-up">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white">What year are you in?</h2>
-            <p className="text-white/40 text-base font-arabic mt-1">في أي سنة دراسية أنت؟</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {yearOptions.map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => {
-                  setStudyYear(opt.value)
-                  setTimeout(() => setStep('assessment'), 200)
-                }}
-                className={`glass-card p-5 text-center transition-all cursor-pointer hover:scale-105 ${
-                  studyYear === opt.value ? 'neon-border' : 'hover:border-white/20'
-                }`}
-              >
-                <div className="text-3xl mb-2">{opt.emoji}</div>
-                <p className="text-white font-semibold text-sm">{opt.label}</p>
-                <p className="text-white/40 text-xs font-arabic">{opt.labelAr}</p>
-              </button>
-            ))}
-          </div>
         </div>
       </div>
-    )
-  }
+    </div>
+  )
+}
+
+
+// ── Step: Year ───────────────────────────────────────────────────
+// ── Step: Year ───────────────────────────────────────────────────
+if (step === 'year') {
+  return (
+    <div className="min-h-screen bg-[#0B1120] relative overflow-hidden flex items-center justify-center px-4 py-10">
+      <DarkBg />
+
+      <div className="relative z-10 w-full max-w-2xl animate-slide-up">
+        
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-white">
+            What year are you in?
+          </h2>
+          <p className="text-white/40 text-base font-arabic mt-1">
+            في أي سنة دراسية أنت؟
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {yearOptions.map(opt => (
+            <GlassCard
+              key={opt.value}
+              hover
+              onClick={() => {
+                setStudyYear(opt.value)
+                setTimeout(() => setStep('assessment'), 200)
+              }}
+              className={`group cursor-pointer text-center bg-[#0F1629]/70 backdrop-blur-xl border border-white/5 rounded-2xl p-5 transition-all duration-300 
+              hover:border-cyan-400/40 hover:shadow-[0_0_35px_rgba(34,211,238,0.15)]
+              ${studyYear === opt.value 
+                ? 'border-cyan-400/40 shadow-[0_0_35px_rgba(34,211,238,0.15)]' 
+                : ''
+              }`}
+            >
+              <div className="text-3xl mb-2">{opt.emoji}</div>
+
+              <p className="text-white font-semibold text-sm">
+                {opt.label}
+              </p>
+
+              <p className="text-white/40 text-xs font-arabic">
+                {opt.labelAr}
+              </p>
+            </GlassCard>
+          ))}
+        </div>
+
+      </div>
+    </div>
+  )
+}
 
   // ── Step: Assessment ─────────────────────────────────────────────
   if (step === 'assessment') {
@@ -299,14 +331,17 @@ export default function OnboardingFlow() {
             <p className="text-white/40 mt-2 font-arabic">مساراتك المهنية المقترحة</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className=" grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             {mockTrackRecommendations.map((rec, i) => (
               <GlassCard
                 key={i}
                 hover
                 neonBorder={selectedRec === i}
                 onClick={() => setSelectedRec(i)}
-                className={`cursor-pointer transition-all ${selectedRec === i ? '' : 'hover:border-white/20'}`}
+                className={`bg-[#0B1120] cursor-pointer transition-all duration-300 
+                                hover:border-cyan-400/40 hover:shadow-[0_0_35px_rgba(34,211,238,0.15)]
+                                   ${selectedRec === i ? 'border-cyan-400/40 shadow-[0_0_35px_rgba(34,211,238,0.15)]' : ''}`}
+               
               >
                 {i === 0 && (
                   <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-cyan-400/15 text-cyan-400 border border-cyan-400/30 text-xs font-semibold mb-3">
@@ -373,7 +408,7 @@ export default function OnboardingFlow() {
 
           <div className="space-y-3 mb-8">
             {mockRoadmapStages.slice(0, 3).map((stage, i) => (
-              <GlassCard key={stage.id} padding={false} className="p-4 flex items-center gap-4">
+              <GlassCard key={stage.id} padding={false} className="bg-[#0B1120] p-4 flex items-center gap-4">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 border
                   ${i === 0 ? 'bg-green-400 text-black border-green-400' :
                     i === 1 ? 'bg-cyan-400/20 text-cyan-400 border-cyan-400' :
@@ -386,15 +421,15 @@ export default function OnboardingFlow() {
                 </div>
               </GlassCard>
             ))}
-            <GlassCard padding={false} className="p-4 text-center text-white/30 text-sm">
+            <GlassCard padding={false} className=" bg-[#0B1120] p-4 text-center text-white/30 text-sm">
               + 2 more stages unlocked as you progress · +2 مراحل إضافية تُفتح تدريجياً
             </GlassCard>
           </div>
 
-          <div className="text-center">
+          <div className="text-center animate-scale-in ">
             <button
               onClick={handleFinish}
-              className="btn-neon text-white px-12 py-4 rounded-2xl text-lg font-bold shadow-neon-cyan"
+              className="btn-neon text-white px-10 py-4 rounded-2xl text-lg font-semibold"
             >
               Start My Journey! · ابدأ رحلتي 🚀
             </button>
