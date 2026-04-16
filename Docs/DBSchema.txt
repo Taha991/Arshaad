@@ -1,0 +1,634 @@
+-- ==============================
+-- ARSHAAD - Complete Database Schema
+-- Tech Stack: Django + AI/ML + Flutter + Third-party APIs
+-- ==============================
+
+-- Enable required extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+CREATE EXTENSION IF NOT EXISTS "btree_gin";
+
+-- ==============================
+-- Users & Authentication
+-- ==============================
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255),
+    role VARCHAR(50) CHECK (role IN ('guest','student','mentor','admin')) NOT NULL DEFAULT 'student',
+    uni_id VARCHAR(100),
+    name VARCHAR(150),
+    avatar TEXT,
+    country VARCHAR(100) DEFAULT 'EG',
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    phone VARCHAR(20),
+    university VARCHAR(255),
+    study_year INT CHECK (study_year BETWEEN 1 AND 6),
+    major VARCHAR(100),
+    linkedin_url VARCHAR(255),
+    github_username VARCHAR(100),
+    last_login TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE,
+    is_verified BOOLEAN DEFAULT FALSE,
+    onboarding_completed BOOLEAN DEFAULT FALSE,
+    is_staff BOOLEAN DEFAULT FALSE,
+    is_superuser BOOLEAN DEFAULT FALSE,
+    date_joined TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE user_preferences (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    learning_style VARCHAR(50) CHECK (learning_style IN ('visual','auditory','kinesthetic','reading')) DEFAULT 'visual',
+    preferred_language VARCHAR(10) DEFAULT 'en',
+    weekly_study_hours INT DEFAULT 10,
+    target_countries TEXT[] DEFAULT ARRAY['EG'],
+    preferred_salary_range JSONB DEFAULT '{"min": 15000, "max": 50000, "currency": "EGP"}',
+    remote_work_preference BOOLEAN DEFAULT TRUE,
+    notification_settings JSONB DEFAULT '{"email": true, "push": true, "roadmap_updates": true, "mentor_messages": true, "job_alerts": true}',
+    ai_personalization_enabled BOOLEAN DEFAULT TRUE,
+    data_sharing_consent BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE user_sessions (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    refresh_token VARCHAR(512) UNIQUE NOT NULL,
+    access_token_jti VARCHAR(255),
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    last_used TIMESTAMP DEFAULT NOW(),
+    user_agent TEXT,
+    ip_address INET,
+    device_info JSONB,
+    is_mobile BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE auth_tokens (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    token VARCHAR(255) UNIQUE NOT NULL,
+    token_type VARCHAR(50) CHECK (token_type IN ('email_verification', 'password_reset', 'magic_link')) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    used_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ==============================
+-- AI/ML Assessment & Recommendation System
+-- ==============================
+CREATE TABLE assessments (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    version VARCHAR(10) DEFAULT '1.0',
+    answers_json JSONB NOT NULL,
+    score_vector JSONB,
+    personality_traits JSONB,
+    skill_levels JSONB,
+    interests_vector JSONB,
+    completion_time_seconds INT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE recommendations (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    assessment_id INT REFERENCES assessments(id),
+    track VARCHAR(100) NOT NULL,
+    confidence NUMERIC(5,2),
+    model_version VARCHAR(50) DEFAULT 'v1.0',
+    explanation TEXT,
+    alternative_tracks JSONB,
+    personalization_factors JSONB,
+    feedback_score INT CHECK (feedback_score BETWEEN 1 AND 5),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE ml_training_logs (
+    id SERIAL PRIMARY KEY,
+    model_type VARCHAR(100) NOT NULL,
+    version VARCHAR(50) NOT NULL,
+    accuracy NUMERIC(5,4),
+    precision_score NUMERIC(5,4),
+    recall_score NUMERIC(5,4),
+    f1_score NUMERIC(5,4),
+    training_samples INT,
+    features_used TEXT[],
+    hyperparameters JSONB,
+    trained_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ==============================
+-- Roadmaps & Learning Resources
+-- ==============================
+CREATE TABLE roadmaps (
+    id SERIAL PRIMARY KEY,
+    uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    tags TEXT[],
+    difficulty VARCHAR(20) CHECK (difficulty IN ('beginner','intermediate','advanced')) DEFAULT 'beginner',
+    estimated_weeks INT DEFAULT 12,
+    prerequisites TEXT[],
+    learning_objectives TEXT[],
+    career_tracks TEXT[],
+    popularity_score INT DEFAULT 0,
+    success_rate NUMERIC(5,2) DEFAULT 0,
+    created_by INT REFERENCES users(id),
+    is_public BOOLEAN DEFAULT TRUE,
+    is_featured BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE roadmap_stages (
+    id SERIAL PRIMARY KEY,
+    roadmap_id INT REFERENCES roadmaps(id) ON DELETE CASCADE,
+    stage_order INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    goals TEXT,
+    estimated_hours INT DEFAULT 20,
+    skills_gained TEXT[],
+    completion_criteria TEXT
+);
+
+CREATE TABLE resources (
+    id SERIAL PRIMARY KEY,
+    uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
+    type VARCHAR(50) CHECK (type IN ('book','video','course','tool','article','podcast','github')) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    provider VARCHAR(100),
+    url TEXT NOT NULL,
+    thumbnail_url TEXT,
+    metadata JSONB,
+    rating NUMERIC(3,2) DEFAULT 0,
+    review_count INT DEFAULT 0,
+    difficulty_level VARCHAR(20) CHECK (difficulty_level IN ('beginner','intermediate','advanced')),
+    is_free BOOLEAN DEFAULT TRUE,
+    price NUMERIC(8,2),
+    currency VARCHAR(3) DEFAULT 'USD',
+    estimated_duration_hours INT,
+    language VARCHAR(10) DEFAULT 'en',
+    subtitles_available TEXT[],
+    prerequisites TEXT[],
+    skills_covered TEXT[],
+    last_checked TIMESTAMP DEFAULT NOW(),
+    status VARCHAR(20) CHECK (status IN ('active','broken','deprecated','pending_review')) DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE roadmap_resources (
+    id SERIAL PRIMARY KEY,
+    roadmap_stage_id INT REFERENCES roadmap_stages(id) ON DELETE CASCADE,
+    resource_id INT REFERENCES resources(id) ON DELETE CASCADE,
+    is_required BOOLEAN DEFAULT TRUE,
+    order_in_stage INT DEFAULT 1,
+    estimated_completion_days INT DEFAULT 3
+);
+
+CREATE TABLE external_api_logs (
+    id SERIAL PRIMARY KEY,
+    provider VARCHAR(100) NOT NULL,
+    endpoint VARCHAR(255),
+    method VARCHAR(10) DEFAULT 'GET',
+    status_code INT,
+    response_time_ms INT,
+    error_message TEXT,
+    rate_limit_remaining INT,
+    cost NUMERIC(8,4),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE resource_health_checks (
+    id SERIAL PRIMARY KEY,
+    resource_id INT REFERENCES resources(id) ON DELETE CASCADE,
+    status_code INT,
+    response_time_ms INT,
+    is_accessible BOOLEAN,
+    error_details TEXT,
+    checked_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ==============================
+-- Progress Tracking & Gamification
+-- ==============================
+CREATE TABLE progress (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    resource_id INT REFERENCES resources(id) ON DELETE CASCADE,
+    roadmap_stage_id INT REFERENCES roadmap_stages(id),
+    status VARCHAR(20) CHECK (status IN ('todo','in_progress','done','skipped')) DEFAULT 'todo',
+    progress_percentage INT DEFAULT 0 CHECK (progress_percentage BETWEEN 0 AND 100),
+    time_spent_minutes INT DEFAULT 0,
+    notes TEXT,
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    started_at TIMESTAMP,
+    finished_at TIMESTAMP,
+    last_activity TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE study_sessions (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    resource_id INT REFERENCES resources(id),
+    duration_minutes INT NOT NULL,
+    quality_rating INT CHECK (quality_rating BETWEEN 1 AND 5),
+    notes TEXT,
+    tags TEXT[],
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE achievements (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    icon VARCHAR(100),
+    category VARCHAR(50) CHECK (category IN ('progress','social','streak','skill','milestone')),
+    criteria JSONB NOT NULL,
+    points INT DEFAULT 10,
+    rarity VARCHAR(20) CHECK (rarity IN ('common','rare','epic','legendary')) DEFAULT 'common',
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE user_achievements (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    achievement_id INT REFERENCES achievements(id) ON DELETE CASCADE,
+    earned_at TIMESTAMP DEFAULT NOW(),
+    progress_data JSONB,
+    UNIQUE(user_id, achievement_id)
+);
+
+CREATE TABLE learning_streaks (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    current_streak INT DEFAULT 0,
+    longest_streak INT DEFAULT 0,
+    last_activity_date DATE,
+    streak_start_date DATE,
+    total_study_days INT DEFAULT 0
+);
+
+-- ==============================
+-- Mentorship & Community
+-- ==============================
+CREATE TABLE mentors (
+    user_id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    bio TEXT,
+    specializations TEXT[],
+    experience_years INT,
+    company VARCHAR(255),
+    job_title VARCHAR(255),
+    skills TEXT[],
+    availability JSONB,
+    rating NUMERIC(3,2) DEFAULT 0,
+    total_reviews INT DEFAULT 0,
+    hourly_rate NUMERIC(8,2),
+    currency VARCHAR(3) DEFAULT 'EGP',
+    timezone VARCHAR(50),
+    calendly_url TEXT,
+    zoom_link TEXT,
+    total_sessions INT DEFAULT 0,
+    total_mentees INT DEFAULT 0,
+    response_time_hours INT DEFAULT 24,
+    languages TEXT[] DEFAULT ARRAY['en','ar'],
+    is_available BOOLEAN DEFAULT TRUE,
+    is_verified BOOLEAN DEFAULT FALSE,
+    mentor_since TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE mentoring_sessions (
+    id SERIAL PRIMARY KEY,
+    mentor_id INT REFERENCES mentors(user_id),
+    mentee_id INT REFERENCES users(id),
+    scheduled_at TIMESTAMP NOT NULL,
+    duration_minutes INT DEFAULT 60,
+    status VARCHAR(50) CHECK (status IN ('scheduled','completed','cancelled','no_show')) DEFAULT 'scheduled',
+    session_type VARCHAR(50) CHECK (session_type IN ('general','technical','career','project_review')) DEFAULT 'general',
+    notes TEXT,
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    feedback TEXT,
+    payment_amount NUMERIC(8,2),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE study_groups (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    roadmap_id INT REFERENCES roadmaps(id),
+    mentor_id INT REFERENCES mentors(user_id),
+    max_members INT DEFAULT 20,
+    current_members INT DEFAULT 0,
+    meeting_schedule JSONB,
+    discord_url TEXT,
+    telegram_url TEXT,
+    whatsapp_url TEXT,
+    meeting_link TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    is_public BOOLEAN DEFAULT TRUE,
+    tags TEXT[],
+    language VARCHAR(10) DEFAULT 'en',
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE study_group_members (
+    id SERIAL PRIMARY KEY,
+    study_group_id INT REFERENCES study_groups(id) ON DELETE CASCADE,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    role VARCHAR(50) CHECK (role IN ('owner','moderator','member')) DEFAULT 'member',
+    joined_at TIMESTAMP DEFAULT NOW(),
+    is_active BOOLEAN DEFAULT TRUE,
+    contribution_score INT DEFAULT 0,
+    UNIQUE(study_group_id, user_id)
+);
+
+-- ==============================
+-- Jobs & Market Data
+-- ==============================
+CREATE TABLE jobs (
+    id SERIAL PRIMARY KEY,
+    external_id VARCHAR(255) UNIQUE,
+    source VARCHAR(100) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    company VARCHAR(255),
+    company_logo_url TEXT,
+    location VARCHAR(255),
+    country VARCHAR(100),
+    city VARCHAR(100),
+    salary_min INT,
+    salary_max INT,
+    salary_currency VARCHAR(3) DEFAULT 'EGP',
+    remote_ok BOOLEAN DEFAULT FALSE,
+    hybrid_ok BOOLEAN DEFAULT FALSE,
+    experience_level VARCHAR(50) CHECK (experience_level IN ('entry','junior','mid','senior','lead','executive')) DEFAULT 'entry',
+    employment_type VARCHAR(50) CHECK (employment_type IN ('full_time','part_time','contract','internship','freelance')) DEFAULT 'full_time',
+    description TEXT,
+    requirements TEXT[],
+    preferred_qualifications TEXT[],
+    benefits TEXT[],
+    skills_required TEXT[],
+    programming_languages TEXT[],
+    tools_technologies TEXT[],
+    application_url TEXT,
+    application_deadline TIMESTAMP,
+    posted_at TIMESTAMP,
+    scraped_at TIMESTAMP DEFAULT NOW(),
+    is_active BOOLEAN DEFAULT TRUE,
+    view_count INT DEFAULT 0,
+    application_count INT DEFAULT 0,
+    match_score NUMERIC(5,2)
+);
+
+CREATE TABLE job_applications (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    job_id INT REFERENCES jobs(id) ON DELETE CASCADE,
+    status VARCHAR(50) CHECK (status IN ('interested','applied','interview','rejected','offer','accepted')) DEFAULT 'interested',
+    applied_at TIMESTAMP DEFAULT NOW(),
+    notes TEXT,
+    UNIQUE(user_id, job_id)
+);
+
+CREATE TABLE market_analytics (
+    id SERIAL PRIMARY KEY,
+    country VARCHAR(100) NOT NULL,
+    track VARCHAR(100) NOT NULL,
+    skill VARCHAR(100),
+    demand_score NUMERIC(5,2),
+    avg_salary NUMERIC(10,2),
+    salary_currency VARCHAR(3),
+    job_count INT,
+    growth_rate NUMERIC(5,2),
+    data_date DATE,
+    source VARCHAR(100),
+    created_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(country, track, skill, data_date)
+);
+
+-- ==============================
+-- Events & Community
+-- ==============================
+CREATE TABLE events (
+    id SERIAL PRIMARY KEY,
+    external_id VARCHAR(255),
+    source VARCHAR(100),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    category VARCHAR(100),
+    tags TEXT[],
+    organizer VARCHAR(255),
+    location VARCHAR(255),
+    city VARCHAR(100),
+    country VARCHAR(100) DEFAULT 'EG',
+    venue VARCHAR(255),
+    is_online BOOLEAN DEFAULT FALSE,
+    is_free BOOLEAN DEFAULT TRUE,
+    price NUMERIC(8,2),
+    currency VARCHAR(3) DEFAULT 'EGP',
+    starts_at TIMESTAMP NOT NULL,
+    ends_at TIMESTAMP,
+    registration_url TEXT,
+    event_url TEXT,
+    max_attendees INT,
+    current_attendees INT DEFAULT 0,
+    skills_focus TEXT[],
+    target_audience VARCHAR(100),
+    language VARCHAR(10) DEFAULT 'en',
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE event_attendees (
+    id SERIAL PRIMARY KEY,
+    event_id INT REFERENCES events(id) ON DELETE CASCADE,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    status VARCHAR(50) CHECK (status IN ('interested','registered','attended','cancelled')) DEFAULT 'interested',
+    registered_at TIMESTAMP DEFAULT NOW(),
+    attended_at TIMESTAMP,
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    feedback TEXT,
+    UNIQUE(event_id, user_id)
+);
+
+-- ==============================
+-- Notifications & Communication
+-- ==============================
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    type VARCHAR(50) CHECK (type IN ('roadmap_update','mentor_message','job_match','event_reminder','achievement','study_reminder','group_activity')) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    message TEXT,
+    action_url TEXT,
+    priority VARCHAR(20) CHECK (priority IN ('low','medium','high','urgent')) DEFAULT 'medium',
+    is_read BOOLEAN DEFAULT FALSE,
+    read_at TIMESTAMP,
+    sent_via JSONB,
+    metadata JSONB,
+    expires_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE push_tokens (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    token VARCHAR(500) NOT NULL,
+    platform VARCHAR(20) CHECK (platform IN ('android','ios','web')) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT NOW(),
+    last_used TIMESTAMP DEFAULT NOW()
+);
+
+-- ==============================
+-- Content & Discounts
+-- ==============================
+CREATE TABLE discounts (
+    id SERIAL PRIMARY KEY,
+    provider VARCHAR(100) NOT NULL,
+    course_title VARCHAR(255),
+    discount_code VARCHAR(100),
+    discount_url TEXT,
+    discount_percentage INT,
+    original_price NUMERIC(8,2),
+    discounted_price NUMERIC(8,2),
+    currency VARCHAR(3) DEFAULT 'USD',
+    valid_from TIMESTAMP DEFAULT NOW(),
+    expires_at TIMESTAMP,
+    max_uses INT,
+    current_uses INT DEFAULT 0,
+    target_tracks TEXT[],
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE user_discount_usage (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    discount_id INT REFERENCES discounts(id) ON DELETE CASCADE,
+    used_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(user_id, discount_id)
+);
+
+-- ==============================
+-- System Administration
+-- ==============================
+CREATE TABLE system_settings (
+    key VARCHAR(100) PRIMARY KEY,
+    value JSONB NOT NULL,
+    description TEXT,
+    category VARCHAR(50) DEFAULT 'general',
+    is_public BOOLEAN DEFAULT FALSE,
+    updated_at TIMESTAMP DEFAULT NOW(),
+    updated_by INT REFERENCES users(id)
+);
+
+CREATE TABLE admin_logs (
+    id SERIAL PRIMARY KEY,
+    admin_id INT REFERENCES users(id),
+    action VARCHAR(100) NOT NULL,
+    resource_type VARCHAR(100),
+    resource_id INT,
+    old_values JSONB,
+    new_values JSONB,
+    ip_address INET,
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ==============================
+-- Analytics & Tracking
+-- ==============================
+CREATE TABLE user_activity_logs (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    session_id VARCHAR(255),
+    action VARCHAR(100) NOT NULL,
+    resource_type VARCHAR(100),
+    resource_id INT,
+    metadata JSONB,
+    duration_seconds INT,
+    device_info JSONB,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE feature_flags (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT,
+    is_enabled BOOLEAN DEFAULT FALSE,
+    rollout_percentage INT DEFAULT 0 CHECK (rollout_percentage BETWEEN 0 AND 100),
+    target_users JSONB,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ==============================
+-- INDEXES for Performance
+-- ==============================
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_users_country ON users(country);
+CREATE INDEX idx_users_is_active ON users(is_active);
+CREATE INDEX idx_users_uuid ON users(uuid);
+
+CREATE INDEX idx_user_sessions_user_id ON user_sessions(user_id);
+CREATE INDEX idx_user_sessions_refresh_token ON user_sessions(refresh_token);
+CREATE INDEX idx_user_sessions_expires_at ON user_sessions(expires_at);
+
+CREATE INDEX idx_assessments_user_id ON assessments(user_id);
+CREATE INDEX idx_recommendations_user_id ON recommendations(user_id);
+CREATE INDEX idx_recommendations_track ON recommendations(track);
+
+CREATE INDEX idx_roadmaps_difficulty ON roadmaps(difficulty);
+CREATE INDEX idx_roadmaps_is_public ON roadmaps(is_public);
+CREATE INDEX idx_roadmaps_career_tracks ON roadmaps USING GIN(career_tracks);
+CREATE INDEX idx_roadmap_stages_roadmap_id ON roadmap_stages(roadmap_id);
+CREATE INDEX idx_resources_type ON resources(type);
+CREATE INDEX idx_resources_status ON resources(status);
+CREATE INDEX idx_resources_is_free ON resources(is_free);
+CREATE INDEX idx_resources_language ON resources(language);
+CREATE INDEX idx_resources_skills_covered ON resources USING GIN(skills_covered);
+CREATE INDEX idx_roadmap_resources_stage_id ON roadmap_resources(roadmap_stage_id);
+
+CREATE INDEX idx_progress_user_id ON progress(user_id);
+CREATE INDEX idx_progress_status ON progress(status);
+CREATE INDEX idx_progress_last_activity ON progress(last_activity);
+CREATE INDEX idx_study_sessions_user_id ON study_sessions(user_id);
+
+CREATE INDEX idx_jobs_country ON jobs(country);
+CREATE INDEX idx_jobs_city ON jobs(city);
+CREATE INDEX idx_jobs_posted_at ON jobs(posted_at DESC);
+CREATE INDEX idx_jobs_is_active ON jobs(is_active);
+CREATE INDEX idx_jobs_remote_ok ON jobs(remote_ok);
+CREATE INDEX idx_jobs_experience_level ON jobs(experience_level);
+CREATE INDEX idx_jobs_skills_required ON jobs USING GIN(skills_required);
+CREATE INDEX idx_jobs_match_score ON jobs(match_score DESC);
+
+CREATE INDEX idx_events_city ON events(city);
+CREATE INDEX idx_events_starts_at ON events(starts_at);
+CREATE INDEX idx_events_is_online ON events(is_online);
+CREATE INDEX idx_events_tags ON events USING GIN(tags);
+
+CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX idx_notifications_is_read ON notifications(is_read);
+CREATE INDEX idx_notifications_type ON notifications(type);
+CREATE INDEX idx_notifications_created_at ON notifications(created_at DESC);
+
+CREATE INDEX idx_study_groups_is_active ON study_groups(is_active);
+CREATE INDEX idx_study_groups_is_public ON study_groups(is_public);
+CREATE INDEX idx_study_group_members_group_id ON study_group_members(study_group_id);
+CREATE INDEX idx_study_group_members_user_id ON study_group_members(user_id);
+
+CREATE INDEX idx_user_achievements_user_id ON user_achievements(user_id);
+CREATE INDEX idx_achievements_category ON achievements(category);
+
+CREATE INDEX idx_jobs_title_search ON jobs USING GIN(to_tsvector('english', title));
+CREATE INDEX idx_resources_title_search ON resources USING GIN(to_tsvector('english', title));
+CREATE INDEX idx_events_title_search ON events USING GIN(to_tsvector('english', title));
