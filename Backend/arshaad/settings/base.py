@@ -97,15 +97,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'arshaad.wsgi.application'
 ASGI_APPLICATION = 'arshaad.asgi.application'
 
-# Database
+# Database — reads from env vars, falls back to Neon defaults for dev
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "neondb",
-        "USER": "neondb_owner",
-        "PASSWORD": "npg_JOlGE8z9phtm",
-        "HOST": "ep-polished-grass-abenm3nm-pooler.eu-west-2.aws.neon.tech",
-        "PORT": "5432",
+        "NAME": os.environ.get('DB_NAME', 'neondb'),
+        "USER": os.environ.get('DB_USER', 'neondb_owner'),
+        "PASSWORD": os.environ.get('DB_PASSWORD', 'npg_JOlGE8z9phtm'),
+        "HOST": os.environ.get('DB_HOST', 'ep-polished-grass-abenm3nm-pooler.eu-west-2.aws.neon.tech'),
+        "PORT": os.environ.get('DB_PORT', '5432'),
         "OPTIONS": {"sslmode": "require"},
     }
 }
@@ -181,7 +181,8 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
 # CORS settings - Allow frontend to access API
-CORS_ALLOWED_ORIGINS = [
+_cors_env = os.environ.get('CORS_ALLOWED_ORIGINS', '')
+CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_env.split(',') if o.strip()] or [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5174",

@@ -1,22 +1,26 @@
 FROM python:3.11-slim
 
-# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_ENVIRONMENT=prod
+ENV DJANGO_SETTINGS_MODULE=arshaad.settings.prod
 
-# Set work directory
 WORKDIR /app
 
-# Install dependencies
+# Install system deps needed by psycopg2-binary + Pillow
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
 COPY requirements/prod.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project
 COPY . /app/
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+# Collect static files (non-fatal — DB not needed here)
+RUN python manage.py collectstatic --noinput || true
 
-# Run gunicorn
-CMD ["gunicorn", "arshaad.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Entrypoint: migrate then start gunicorn
+CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn arshaad.wsgi:application -c gunicorn.conf.py"]
