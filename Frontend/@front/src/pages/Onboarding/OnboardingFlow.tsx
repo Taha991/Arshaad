@@ -513,71 +513,65 @@ export default function OnboardingFlow() {
 
   if (step === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#0B1120] via-[#1a2847] to-[#0B1120] relative overflow-hidden flex items-center justify-center px-4 py-12">
+      <div className="min-h-screen bg-[#0d1b2e] relative overflow-hidden flex items-center justify-center px-4 py-12">
         <DarkBg />
-        
-        <div className="relative z-10 w-full max-w-md">
-          <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-12 shadow-2xl">
-            {/* Spinner with Brain Icon from teammate */}
-            <div className="flex justify-center mb-8 relative">
-              <div className="relative w-28 h-28">
-                <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-cyan-400 border-r-violet-400 animate-spin" />
-                <div className="absolute inset-2 rounded-full border-2 border-transparent border-b-blue-400 border-l-cyan-400 animate-spin-slow" />
-                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-blue-500/30 to-violet-500/30" />
-                <div className="absolute inset-0 flex items-center justify-center text-3xl">🧠</div>
+
+        <div className="relative z-10 w-full max-w-lg">
+          <div className="bg-[#0f1f35]/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-12 shadow-[0_0_80px_rgba(59,130,246,0.12)] text-center">
+
+            {/* Clean gradient ring spinner */}
+            <div className="flex justify-center mb-10">
+              <div className="relative w-24 h-24">
+                <svg className="absolute inset-0 w-full h-full animate-spin-slow" viewBox="0 0 96 96" fill="none">
+                  <circle cx="48" cy="48" r="44" stroke="url(#spinGrad)" strokeWidth="4" strokeLinecap="round"
+                    strokeDasharray="220" strokeDashoffset="55" />
+                  <defs>
+                    <linearGradient id="spinGrad" x1="0" y1="0" x2="96" y2="96" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#6b5bf8" />
+                      <stop offset="100%" stopColor="#7ad3ff" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="absolute inset-0 rounded-full border border-white/5" />
               </div>
             </div>
 
             {/* Title */}
-            <h1 className="text-center text-2xl md:text-3xl font-bold text-white mb-2">
-              Analyzing Your Profile
+            <h1 className="text-2xl md:text-3xl font-bold mb-2"
+              style={{ background: 'linear-gradient(90deg,#6b5bf8,#7ad3ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              AI is analyzing your profile
             </h1>
-            <p className="text-center text-sm text-white/40 mb-10 font-arabic">
-              جاري تحليل ملفك الشخصي
+            <p className="text-white/40 text-sm font-arabic mb-10">
+              الذكاء الاصطناعي يحلل ملفك الشخصي
             </p>
 
-            {/* Steps */}
-            <div className="space-y-4">
-              {loadingSteps.map((loadStep, index) => (
-                <div
-                  key={index}
-                  className={`flex items-start gap-3 px-4 py-3 rounded-xl border transition-all ${
-                    index <= loadingStepIdx
-                      ? 'bg-emerald-500/10 border-emerald-500/30 animate-fade-in'
-                      : 'bg-white/5 border-white/10'
-                  }`}
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 text-sm font-bold ${
-                    index <= loadingStepIdx
-                      ? 'bg-emerald-500/20 border border-emerald-500/50 text-emerald-400'
-                      : 'bg-white/5 border border-white/10 text-white/30'
-                  }`}>
-                    {index <= loadingStepIdx ? loadStep.icon : index + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium truncate ${
-                      index <= loadingStepIdx ? 'text-white' : 'text-white/50'
+            {/* Steps list */}
+            <div className="space-y-4 text-left">
+              {loadingSteps.map((loadStep, index) => {
+                const done = index <= loadingStepIdx
+                return (
+                  <div key={index} className={`flex items-center gap-3 transition-all duration-500 ${done ? 'opacity-100 animate-fade-in' : 'opacity-30'}`}
+                    style={{ animationDelay: `${index * 80}ms` }}>
+                    {/* Circle checkmark */}
+                    <div className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+                      done
+                        ? 'border-emerald-400 bg-emerald-400/10'
+                        : 'border-white/20 bg-transparent'
                     }`}>
+                      {done && (
+                        <svg className="w-3 h-3 text-emerald-400" viewBox="0 0 12 12" fill="none">
+                          <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </div>
+                    <p className={`text-sm font-medium ${done ? 'text-white' : 'text-white/40'}`}>
                       {loadStep.label}
                     </p>
-                    <p className={`text-xs ${
-                      index <= loadingStepIdx ? 'text-white/50' : 'text-white/20'
-                    }`}>
-                      {loadStep.labelAr}
-                    </p>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
-            {/* Progress bar */}
-            <div className="mt-8 w-full h-1 bg-white/10 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 transition-all duration-300"
-                style={{ width: `${((loadingStepIdx + 1) / loadingSteps.length) * 100}%` }}
-              />
-            </div>
           </div>
         </div>
 
@@ -587,14 +581,14 @@ export default function OnboardingFlow() {
             to { transform: rotate(360deg); }
           }
           .animate-spin-slow {
-            animation: spin-slow 3s linear infinite;
+            animation: spin-slow 2.5s linear infinite;
           }
           @keyframes fade-in {
-            from { opacity: 0; transform: translateY(-4px); }
+            from { opacity: 0; transform: translateY(4px); }
             to { opacity: 1; transform: translateY(0); }
           }
           .animate-fade-in {
-            animation: fade-in 0.5s ease-out forwards;
+            animation: fade-in 0.4s ease-out forwards;
           }
         `}</style>
       </div>
@@ -705,46 +699,75 @@ export default function OnboardingFlow() {
     const icon = rec?.icon || '🎯'
     const trackNameAr = rec?.trackAr || 'المسار'
 
+    // Roadmap stages derived from mockRoadmapStages with generic labels matching design
+    const roadmapStages = [
+      { title: 'Foundation',        titleAr: 'الأساسيات',          duration: '3 months' },
+      { title: 'Core Skills',       titleAr: 'المهارات الأساسية',   duration: '6 months' },
+      { title: 'Advanced Topics',   titleAr: 'المواضيع المتقدمة',   duration: '4 months' },
+      { title: 'Portfolio Projects',titleAr: 'مشاريع المحفظة',      duration: '3 months' },
+      { title: 'Job Ready',         titleAr: 'جاهز للتوظيف',        duration: '2 months' },
+    ]
+
     return (
-      <div className="min-h-screen bg-[#0B1120] relative overflow-hidden flex items-center justify-center px-4 py-10">
+      <div className="min-h-screen bg-[#0d1b2e] relative overflow-hidden flex items-center justify-center px-4 py-10">
         <DarkBg />
-        <div className="relative z-10 w-full max-w-2xl animate-slide-up">
-          <div className="text-center mb-8">
-            <div className="text-4xl mb-2">{icon}</div>
-            <h2 className="text-3xl font-bold gradient-text">{trackName}</h2>
-            <p className="text-white/40 font-arabic mt-1">{trackNameAr}</p>
-            <p className="text-white/50 text-sm mt-2">Your 5-stage learning journey · رحلتك التعليمية من 5 مراحل</p>
-          </div>
+        <div className="relative z-10 w-full max-w-md animate-slide-up">
+          <div className="bg-[#0f1f35]/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-[0_0_80px_rgba(59,130,246,0.12)]">
 
-          <div className="space-y-3 mb-8">
-            {mockRoadmapStages.slice(0, 3).map((stage, i) => (
-              <GlassCard key={stage.id} padding={false} className="bg-[#0B1120] p-4 flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 border
-                  ${i === 0 ? 'bg-green-400 text-black border-green-400' :
-                    i === 1 ? 'bg-cyan-400/20 text-cyan-400 border-cyan-400' :
-                    'bg-white/5 text-white/30 border-white/15'}`}>
-                  {i === 0 ? '✓' : i + 1}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-white font-medium text-sm">{stage.title} · <span className="font-arabic text-white/40">{stage.titleAr}</span></p>
-                  <p className="text-white/40 text-xs mt-0.5">{stage.estimated_hours}h · {stage.skills.slice(0,3).join(', ')}</p>
-                </div>
-              </GlassCard>
-            ))}
-            <GlassCard padding={false} className="bg-[#0B1120] p-4 text-center text-white/30 text-sm">
-              + 2 more stages unlocked as you progress · +2 مراحل إضافية تُفتح تدريجياً
-            </GlassCard>
-          </div>
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center text-lg"
+                style={{ background: 'linear-gradient(135deg,#6b5bf8 0%,#7ad3ff 100%)' }}>
+                🗺️
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white leading-tight">Your Personalized Roadmap</h2>
+                <p className="text-white/40 text-xs font-arabic">خارطة طريقك الشخصية</p>
+              </div>
+            </div>
 
-          <div className="text-center">
-            <button
-              onClick={handleFinish}
-              onMouseDown={blurOnMouseDown}
-              className="btn-neon text-white px-12 py-4 rounded-2xl text-lg font-bold outline-none hover:opacity-90 transition-opacity"
-              style={{ boxShadow: 'none' }}
-            >
-              Start My Journey! · ابدأ رحلتي 🚀
-            </button>
+            {/* Stages with vertical connector line */}
+            <div className="relative mb-6">
+              {/* Vertical line */}
+              <div className="absolute left-5 top-7 bottom-7 w-px bg-white/10" />
+
+              <div className="space-y-3">
+                {roadmapStages.map((stage, i) => (
+                  <div key={i} className="flex items-center gap-4 relative">
+                    {/* Step circle */}
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full border border-white/20 bg-[#0d1b2e] flex items-center justify-center z-10">
+                      <span className="text-white/60 text-sm font-semibold">{i + 1}</span>
+                    </div>
+                    {/* Stage card */}
+                    <div className="flex-1 bg-[#0a1628]/80 border border-white/8 rounded-xl px-4 py-3">
+                      <p className="text-white font-semibold text-sm">{stage.title}</p>
+                      <p className="text-white/40 text-xs mt-0.5">Duration: {stage.duration}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Total duration bar */}
+            <div className="bg-[#0a1628]/80 border border-white/10 rounded-xl px-4 py-3 mb-6 flex items-center justify-between">
+              <p className="text-white/70 text-sm">
+                <span className="font-semibold text-white">Total Duration:</span> 18 months to job-ready
+              </p>
+              <p className="text-white/40 text-xs font-arabic text-right">المدة الإجمالية: 18 شهراً حتى تصبح جاهزاً للعمل</p>
+            </div>
+
+            {/* CTA button */}
+            <div className="flex justify-end">
+              <button
+                onClick={handleFinish}
+                onMouseDown={blurOnMouseDown}
+                className="text-white px-7 py-3 rounded-xl text-sm font-bold outline-none hover:opacity-90 transition-opacity"
+                style={{ background: 'linear-gradient(135deg,#6b5bf8 0%,#5eafff 100%)', boxShadow: '0 0 25px rgba(107,91,248,0.35)' }}
+              >
+                Go to Dashboard →
+              </button>
+            </div>
+
           </div>
         </div>
       </div>

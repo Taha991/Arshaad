@@ -32,17 +32,17 @@ function App() {
       <Route path="/dashboard-test/:tab" element={<StudentDashboard />} />
 
       {/* Protected routes */}
-      <Route
+     <Route
         path="/onboarding"
-        element={isAuthenticated ? <OnboardingFlow /> : <Navigate to="/login" />}
+        element={<OnboardingFlow />}
       />
       <Route
         path="/dashboard"
-        element={isAuthenticated ? <StudentDashboard /> : <Navigate to="/login" />}
+        element={<StudentDashboard />}
       />
       <Route
         path="/dashboard/:tab"
-        element={isAuthenticated ? <StudentDashboard /> : <Navigate to="/login" />}
+        element={<StudentDashboard/>}
       />
 
       {/* Catch all */}
