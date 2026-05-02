@@ -1,0 +1,263 @@
+import { Link } from 'react-router-dom'
+import GlassCard from '@/components/atoms/GlassCard'
+import frame from '@/store/img/Frame.png'
+import a from '@/store/img/a.png'
+import b from '@/store/img/b.png'
+import c from '@/store/img/c.png'
+import d from '@/store/img/d.png'
+import e from '@/store/img/e.png'
+
+const features = [
+  {
+    icon: frame,
+    title: 'Smart Assessment',
+    titleAr: 'تقييم ذكي',
+    desc: '10 personalized questions to discover your ideal tech career path.',
+    descAr: '10 أسئلة مخصصة لاكتشاف مسارك التقني الأمثل.',
+  },
+  {
+    icon: a,
+    title: 'Custom Roadmap',
+    titleAr: 'خارطة طريق مخصصة',
+    desc: 'Stage-by-stage learning plan tailored to your track and goals.',
+    descAr: 'خطة تعلم مرحلة بمرحلة مصممة خصيصاً لمسارك.',
+  },
+  {
+    icon: b,
+    title: 'Study Groups',
+    titleAr: 'مجموعات الدراسة',
+    desc: '10-member study groups with shared interests and one dedicated mentor.',
+    descAr: 'مجموعات من 10 أعضاء بنفس الاهتمامات ومرشد متخصص.',
+  },
+  {
+    icon: c,
+    title: 'Expert Mentorship',
+    titleAr: 'إرشاد الخبراء',
+    desc: 'Connect with industry professionals from top tech companies.',
+    descAr: 'تواصل مع محترفين من كبرى شركات التقنية.',
+  },
+  {
+    icon: d,
+    title: 'Market Insights',
+    titleAr: 'رؤى سوق العمل',
+    desc: 'Live salary benchmarks, job trends, and top in-demand skills.',
+    descAr: 'معايير الرواتب الحية، واتجاهات الوظائف، والمهارات الأكثر طلباً.',
+  },
+  {
+    icon: e,
+    title: 'Events & Networking',
+    titleAr: 'الفعاليات والتواصل',
+    desc: 'Hackathons, webinars, meetups — grow your network while you learn.',
+    descAr: 'هاكاثونات، ندوات، لقاءات — وسّع شبكتك المهنية أثناء التعلم.',
+  },
+]
+
+const stats = [
+  { value: '5K+', label: 'Students'},
+  { value: '50+', label: 'Mentors'},
+  { value: '10+', label: 'Career Tracks' },
+  { value: '95%', label: 'Satisfaction' },
+]
+
+export default function Landing() {
+  // دالة بسيطة لإزالة الـ focus من على الزرار بعد الضغط عليه عشان نمنع أي خط أو تأثير يفضل معلق
+  const blurOnMouseDown = (e: any) => {
+    try { (e.currentTarget as HTMLElement).blur() } catch { /* ignore */ }
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0B1120] relative overflow-hidden">
+
+      {/* Background blobs */}
+      <div className="blob w-[500px] h-[500px] bg-blue-700 top-[-15%] left-[-10%] animate-blob" />
+      <div className="blob w-[400px] h-[400px] bg-violet-700 bottom-[-10%] right-[-10%] animate-blob-delayed" />
+      <div className="blob w-[300px] h-[300px] bg-cyan-600 top-[40%] right-[15%] animate-blob-slow" />
+
+      {/* Nav */}
+      <nav className="relative z-20 glass-card rounded-none border-x-0 border-t-0 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
+          <span className="gradient-text text-2xl font-bold">
+            Arshaad | أرشاد
+          </span>
+
+          <div className="flex items-center gap-3">
+            <Link
+              to="/login"
+              className="btn-glass text-white text-sm font-medium px-4 py-2 rounded-xl outline-none" 
+              onMouseDown={blurOnMouseDown}
+            >
+              Sign In · دخول
+            </Link>
+
+            <Link
+              to="/login?tab=signup"
+              className="btn-neon text-white text-sm font-semibold px-4 py-2 rounded-xl outline-none hover:opacity-90 transition-opacity"
+              style={{ boxShadow: "none" }}
+              onMouseDown={blurOnMouseDown}
+            >
+              Get Started · ابدأ
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-28 pb-24 text-center">
+
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card mb-8 text-xs text-cyan-400 border border-cyan-400/20">
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          Now available for MENA CS students · متاح الآن لطلبة الحاسبات في مينا
+        </div>
+
+        <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-white leading-tight mb-6">
+          Your Career,<br />
+          <span className="gradient-text-animated">
+            Guided by AI
+          </span>
+        </h1>
+
+        <p className="text-white/40 font-arabic text-xl mb-4">
+          مسارك المهني، موجّه بالذكاء الاصطناعي
+        </p>
+
+        <p className="text-white/55 text-lg max-w-2xl mx-auto mb-12 leading-relaxed">
+          Arshaad helps CS students in Egypt and MENA discover the right career path,
+          get a personalized roadmap, join a study group, and land their dream job.
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+
+          <Link
+            to="/login?tab=signup"
+            className="btn-neon text-white text-lg font-bold px-10 py-4 rounded-2xl outline-none hover:opacity-90 transition-opacity"
+            style={{ boxShadow: 'none' }}
+            onMouseDown={blurOnMouseDown}
+          >
+            Start For Free · ابدأ مجاناً 🚀
+          </Link>
+
+          <Link
+            to="/login"
+            className="border border-gray-600 px-10 py-3 rounded-2xl outline-none"
+            onMouseDown={blurOnMouseDown}
+          >
+            Sign In · تسجيل الدخول
+          </Link>
+
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-16 max-w-3xl mx-auto border-[#0F1629]">
+          {stats.map(s => (
+            <GlassCard key={s.label} className="h-[90px] flex items-center bg-[#0F172A] p-7 rounded-xl text-center border border-[#0F1629]" padding={false}>
+
+              <div className="p-5">
+                <div className="gradient-text text-2xl font-extrabold">
+                  {s.value}
+                </div>
+
+                <div className="text-white/50 text-sm mt-1">
+                  {s.label}
+                </div>
+
+                
+              </div>
+
+            </GlassCard>
+          ))}
+
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="relative z-10 max-w-7xl mx-auto px-6 pb-28">
+
+        <div className="text-center mb-14">
+          <h2 className="text-3xl font-bold text-white">
+            Everything you need to succeed
+          </h2>
+
+          <p className="text-white/40 font-arabic mt-2">
+            كل ما تحتاجه لتحقيق النجاح المهني
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          {features.map((f, i) => (
+            <GlassCard
+              key={i}
+              hover
+              className="group bg-[#0F1629]/70 backdrop-blur-xl border border-white/5 rounded-2xl p-6 transition-all duration-300 hover:border-cyan-400/40 hover:shadow-[0_0_35px_rgba(34,211,238,0.15)] outline-none"
+            >
+
+              {/* icon */}
+              <div className="w-14 h-14 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500">
+
+                {typeof f.icon === 'string' && f.icon.endsWith('.png') ? (
+                  <img src={f.icon} alt={f.title} className="w-7 h-7" />
+                ) : (
+                  <span>{f.icon}</span>
+                )}
+
+
+              </div>
+
+              <h3 className="text-white font-semibold text-lg">
+                {f.title}
+              </h3>
+
+              <p className="text-white/40 text-xs font-arabic mb-3">
+                {f.titleAr}
+              </p>
+
+              <p className="text-white/60 text-sm leading-relaxed mb-2">
+                {f.desc}
+              </p>
+
+              <p className="text-white/25 text-xs font-arabic leading-relaxed">
+                {f.descAr}
+              </p>
+
+            </GlassCard>
+          ))}
+
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="relative z-10 max-w-3xl mx-auto px-6 pb-24 text-center">
+        <GlassCard className="bg-[#0F1629]/70 backdrop-blur-xl border border-white/5 p-10 outline-none">
+          <h2 className="text-3xl font-bold gradient-text mb-3">
+            Ready to start your journey?
+          </h2>
+
+          <p className="text-white/40 font-arabic mb-6">
+            هل أنت مستعد لبدء رحلتك المهنية؟
+          </p>
+
+          <Link
+            to="/login?tab=signup"
+            className="inline-block btn-neon text-white font-bold px-10 py-4 rounded-2xl text-lg outline-none hover:opacity-90 transition-opacity"
+            style={{ boxShadow: 'none' }}
+            onMouseDown={blurOnMouseDown}
+          >
+            Join Arshaad Free · انضم مجاناً
+          </Link>
+
+        </GlassCard>
+
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-white/5 py-8 text-center">
+
+        <p className="text-white/20 text-sm">
+          © 2026 Arshaad · أرشاد — Built for MENA CS Students
+        </p>
+
+      </footer>
+
+    </div>
+  )
+}
